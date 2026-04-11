@@ -1,0 +1,18 @@
+{
+    "job_id": "scrape-books-001",
+    "mode": "paged",
+    "target_url": "https://books.toscrape.com/catalogue/page-{page}.html",
+    "output_dir": "./output",
+    "max_requests": 5000,
+    "max_runtime_minutes": 60,
+    "concurrency": 8,
+    "preview_rows": 50,
+    "max_bytes": 52428800,
+    "max_response_size": 1048576,
+    "requests_per_second_limit": 10,
+    "max_retries_per_cycle": 3,
+    "per_host_concurrency": 2,
+    "page_start": 1,
+    "page_end": 50,
+    "max_cost_usd": 3.0
+}
