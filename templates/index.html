@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Hacker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: .25rem
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: .875rem;
+            margin-bottom: 2rem
+        }
+
+        .pricing {
+            background: #1a1d27;
+            border: 1px solid #2a2d37;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-size: .85rem;
+            color: #aaa
+        }
+
+        .pricing strong {
+            color: #4ade80
+        }
+
+        label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 500;
+            color: #aaa;
+            margin-bottom: .25rem;
+            text-transform: uppercase;
+            letter-spacing: .05em
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: .625rem .75rem;
+            background: #1a1d27;
+            border: 1px solid #2a2d37;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: .9rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color .2s
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #3b82f6
+        }
+
+        textarea {
+            font-family: monospace;
+            resize: vertical;
+            min-height: 80px
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem
+        }
+
+        .row>div {
+            flex: 1
+        }
+
+        .hint {
+            font-size: .75rem;
+            color: #666;
+            margin-top: -.75rem;
+            margin-bottom: 1rem
+        }
+
+        button {
+            width: 100%;
+            padding: .75rem;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s
+        }
+
+        button:hover {
+            background: #2563eb
+        }
+
+        button:disabled {
+            background: #1e3a5f;
+            cursor: not-allowed;
+            color: #666
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+            vertical-align: middle;
+            margin-right: .5rem
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none
+        }
+
+        .result.success {
+            display: block;
+            background: #0d2818;
+            border: 1px solid #166534
+        }
+
+        .result.error {
+            display: block;
+            background: #2d1215;
+            border: 1px solid #991b1b
+        }
+
+        .result h3 {
+            font-size: 1rem;
+            margin-bottom: .75rem
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: .85rem
+        }
+
+        .stats span {
+            color: #aaa
+        }
+
+        .stats strong {
+            color: #fff;
+            display: block;
+            font-size: 1.1rem
+        }
+
+        .hidden {
+            display: none
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: .5rem 1rem;
+            background: #4ade80;
+            color: #000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: .85rem;
+            margin-right: .5rem
+        }
+
+        .download-btn:hover {
+            background: #22c55e
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Azure Hacker</h1>
+        <p class="subtitle">Self-service API scraper. Fill the form, get CSV.</p>
+        <div class="pricing">
+            <strong>Free:</strong> up to 50 pages, 1000 requests.
+            <strong>Paid ($1-$5):</strong> up to 500 pages, 5000 requests.
+            All jobs have a 10-minute timeout and $1 cost cap.
+        </div>
+        <form id="jobForm">
+            <label for="target_url">Target URL</label>
+            <input type="text" id="target_url" name="target_url" placeholder="https://api.example.com/data?page={page}"
+                required>
+            <p class="hint" id="url_hint">Use {page} placeholder for paged mode.</p>
+
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode">
+                <option value="paged">Paged (page numbers)</option>
+                <option value="cursor">Cursor (token pagination)</option>
+                <option value="api_loop">API Loop (query variations)</option>
+            </select>
+
+            <div id="paged_fields">
+                <div class="row">
+                    <div>
+                        <label for="page_start">Page Start</label>
+                        <input type="number" id="page_start" name="page_start" value="1" min="1">
+                    </div>
+                    <div>
+                        <label for="page_end">Page End</label>
+                        <input type="number" id="page_end" name="page_end" value="10" min="1" max="500">
+                    </div>
+                </div>
+                <p class="hint">Max 500 pages per job.</p>
+            </div>
+
+            <div id="cursor_fields" class="hidden">
+                <div class="row">
+                    <div>
+                        <label for="cursor_param">Cursor Parameter Name</label>
+                        <input type="text" id="cursor_param" name="cursor_param" value="cursor">
+                    </div>
+                    <div>
+                        <label for="next_cursor_key">Next Cursor Key</label>
+                        <input type="text" id="next_cursor_key" name="next_cursor_key" value="next_cursor">
+                    </div>
+                </div>
+                <p class="hint">The API returns a cursor token in the JSON response body.</p>
+            </div>
+
+            <div id="api_loop_fields" class="hidden">
+                <label for="query_variations">Query Variations (JSON array)</label>
+                <textarea id="query_variations" name="query_variations"
+                    placeholder='[{"q": "python", "limit": 100}, {"q": "java", "limit": 100}]'></textarea>
+                <p class="hint">Each object becomes one request's query parameters.</p>
+            </div>
+
+            <label for="concurrency">Concurrency</label>
+            <input type="number" id="concurrency" name="concurrency" value="4" min="1" max="20">
+            <p class="hint">Parallel connections. Higher = faster but more load on target.</p>
+
+            <button type="submit" id="submitBtn">Run Scraper</button>
+        </form>
+
+        <div id="result" class="result">
+            <h3 id="resultTitle"></h3>
+            <div class="stats" id="resultStats"></div>
+            <div id="resultLinks"></div>
+        </div>
+    </div>
+    <script>
+        const modeSelect = document.getElementById('mode');
+        const form = document.getElementById('jobForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultDiv = document.getElementById('result');
+
+        modeSelect.addEventListener('change', function () {
+            document.getElementById('paged_fields').classList.toggle('hidden', this.value !== 'paged');
+            document.getElementById('cursor_fields').classList.toggle('hidden', this.value !== 'cursor');
+            document.getElementById('api_loop_fields').classList.toggle('hidden', this.value !== 'api_loop');
+        });
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Running...';
+            resultDiv.className = 'result';
+
+            const data = {
+                target_url: document.getElementById('target_url').value,
+                mode: modeSelect.value,
+                page_start: parseInt(document.getElementById('page_start').value),
+                page_end: parseInt(document.getElementById('page_end').value),
+                concurrency: parseInt(document.getElementById('concurrency').value),
+                cursor_param: document.getElementById('cursor_param').value,
+                next_cursor_key: document.getElementById('next_cursor_key').value,
+                query_variations: document.getElementById('query_variations').value || '[]'
+            };
+
+            try {
+                const resp = await fetch('/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+
+                if (resp.ok) {
+                    resultDiv.className = 'result success';
+                    document.getElementById('resultTitle').textContent = 'Job Complete';
+                    document.getElementById('resultStats').innerHTML =
+                        '<div><span>Records</span><strong>' + result.records + '</strong></div>' +
+                        '<div><span>Requests</span><strong>' + result.requests + '</strong></div>' +
+                        '<div><span>Time</span><strong>' + result.elapsed + '</strong></div>';
+                    document.getElementById('resultLinks').innerHTML =
+                        '<a class="download-btn" href="' + result.download_url + '">Download CSV</a>' +
+                        '<a class="download-btn" href="' + result.preview_url + '">Preview</a>';
+                } else {
+                    resultDiv.className = 'result error';
+                    document.getElementById('resultTitle').textContent = 'Job Failed';
+                    document.getElementById('resultStats').innerHTML = '';
+                    document.getElementById('resultLinks').textContent = result.error;
+                }
+            } catch (err) {
+                resultDiv.className = 'result error';
+                document.getElementById('resultTitle').textContent = 'Request Failed';
+                document.getElementById('resultStats').innerHTML = '';
+                document.getElementById('resultLinks').textContent = err.message;
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Run Scraper';
+        });
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS base
+FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -6,13 +6,17 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt \
-    && rm -rf /root/.cache/pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY worker/ ./worker/
+COPY templates/ ./templates/
+COPY app.py ./
 
 RUN mkdir -p "$JOB_OUTPUT_DIR"
 
-ENTRYPOINT ["python", "-m", "worker.platform.cli"]
-CMD ["--config", "/outputs/config.json"]
+EXPOSE 8000
+
+ENTRYPOINT ["python", "app.py"]
