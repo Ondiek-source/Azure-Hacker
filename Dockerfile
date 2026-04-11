@@ -14,10 +14,5 @@ COPY worker/ ./worker/
 
 RUN mkdir -p "$JOB_OUTPUT_DIR"
 
-RUN groupadd --gid 1000 worker \
-    && useradd --uid 1000 --gid worker --no-create-home worker \
-    && chown -R worker:worker /app /outputs
-USER worker
-
 ENTRYPOINT ["python", "-m", "worker.platform.cli"]
-CMD ["--config", "/config.json"]
+CMD ["--config", "/outputs/config.json"]
