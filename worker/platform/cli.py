@@ -11,32 +11,28 @@ import argparse
 import asyncio
 import json
 import logging
+import sys
 
 from typing import Any, Dict
 
 from worker.platform.config import validate_config
 from worker.engine.runner import JobRunner
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s  %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 logger = logging.getLogger("worker")
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse command-line arguments.
-
-    Returns:
-        Namespace with ``config`` path.
-    """
     parser = argparse.ArgumentParser(description="Multi-mode async job worker v3")
     parser.add_argument("--config", required=True, help="Path to job config JSON")
     return parser.parse_args()
 
 
 def main() -> int:
-    """Load config, validate, run job.  Returns exit code.
-
-    Returns:
-        0 on success, 130 on interrupt, 1 on error.
-    """
     args = parse_args()
     try:
         with open(args.config, "r", encoding="utf-8") as f:
